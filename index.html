@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Valentine?</title>
+
+  <style>
+    :root{
+      --bg:#fff;
+      --text:#111;
+      --yes:#22c55e;
+      --yes-dark:#16a34a;
+      --no:#ef4444;
+      --no-dark:#dc2626;
+    }
+
+    *{ box-sizing:border-box; }
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      background:var(--bg);
+      color:var(--text);
+      font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+      overflow:hidden; /* prevent scrollbars when No runs */
+    }
+
+    .wrap{
+      width:min(900px,94vw);
+      text-align:center;
+      padding:24px 10px;
+    }
+
+    /* ---------- FIRST PAGE ---------- */
+    #askScreen{ display:block; }
+
+    .topMedia{
+      width:min(420px,70vw);
+      aspect-ratio: 4 / 3;
+      margin:0 auto 18px;
+      border-radius:10px;
+      overflow:hidden;
+      background:#fff;
+      display:grid;
+      place-items:center;
+    }
+
+    .topMedia img{
+      width:100%;
+      height:100%;
+      object-fit:contain;
+      display:block;
+    }
+
+    h1{
+      margin:0 0 18px;
+      font-size:clamp(28px,4.8vw,52px);
+      font-weight:500;
+    }
+
+    .playArea{
+      position:relative;
+      width:min(340px,92vw);
+      height:88px;
+      margin:0 auto;
+    }
+
+    button{
+      border:none;
+      padding:12px 22px;
+      border-radius:6px;
+      font-size:18px;
+      font-weight:700;
+      cursor:pointer;
+      transition:transform .06s ease, background .15s ease;
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    button:active{ transform:scale(0.98); }
+
+    #yesBtn{
+      background:var(--yes);
+      color:#fff;
+      position:absolute;
+      left:95px;
+      top:18px;
+      z-index:2;
+    }
+    #yesBtn:hover{ background:var(--yes-dark); }
+
+    /* Start "No" next to "Yes" (normal-looking) */
+    #noBtn{
+      background:var(--no);
+      color:#fff;
+      position:absolute;  /* <-- starts inside playArea */
+      left:185px;
+      top:18px;
+      z-index:2;
+    }
+    #noBtn:hover{ background:var(--no-dark); }
+
+    /* When we activate runaway mode, switch it to fixed */
+    #noBtn.runaway{
+      position:fixed;
+      z-index:9999;
+    }
+
+    /* ---------- SECOND PAGE (FULL IMAGE) ---------- */
+    #successScreen{
+      display:none;
+      text-align:center;
+    }
+
+    .successMedia{
+      width: min(720px, 94vw);
+      margin: 0 auto 14px;
+      border-radius: 10px;
+      overflow: visible;
+      background: transparent;
+    }
+
+    .successMedia img{
+      width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    .successText{
+      margin:0;
+      font-size:clamp(26px,4vw,42px);
+      font-weight:900;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrap">
+    <!-- First screen -->
+    <div id="askScreen">
+      <div class="topMedia">
+        <img src="cute.gif" alt="cute" />
+      </div>
+
+      <h1>Will you be my Valentine?</h1>
+
+      <div class="playArea" id="playArea">
+        <button id="yesBtn">Yes</button>
+        <button id="noBtn">No</button>
+      </div>
+    </div>
+
+    <!-- Second screen -->
+    <div id="successScreen">
+      <div class="successMedia">
+        <img src="kiss.gif" alt="kiss" />
+      </div>
+      <p class="successText">WOOOOOO!!! I love you my lil tomatooooo!! ;))</p>
+    </div>
+  </div>
+
+  <script>
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn = document.getElementById("noBtn");
+    const askScreen = document.getElementById("askScreen");
+    const successScreen = document.getElementById("successScreen");
+
+    let runawayActivated = false;
+
+    yesBtn.addEventListener("click", () => {
+      askScreen.style.display = "none";
+      successScreen.style.display = "block";
+      noBtn.style.display = "none";
+    });
+
+    function moveNoButtonAnywhere(){
+      // On first interaction, switch No to fixed at its current on-screen position
+      if (!runawayActivated) {
+        const r = noBtn.getBoundingClientRect();
+        noBtn.classList.add("runaway");
+        noBtn.style.left = r.left + "px";
+        noBtn.style.top  = r.top  + "px";
+        runawayActivated = true;
+      }
+
+      const pad = 12;
+      const btnRect = noBtn.getBoundingClientRect();
+
+      const maxX = window.innerWidth  - btnRect.width  - pad;
+      const maxY = window.innerHeight - btnRect.height - pad;
+
+      const x = Math.floor(pad + Math.random() * Math.max(0, maxX - pad));
+      const y = Math.floor(pad + Math.random() * Math.max(0, maxY - pad));
+
+      noBtn.style.left = x + "px";
+      noBtn.style.top  = y + "px";
+    }
+
+    // Desktop hover escape
+    noBtn.addEventListener("mouseenter", moveNoButtonAnywhere);
+
+    // Mobile tap escape
+    noBtn.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      moveNoButtonAnywhere();
+    }, { passive:false });
+
+    // If they somehow click it
+    noBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      moveNoButtonAnywhere();
+    });
+  </script>
+</body>
+</html>
